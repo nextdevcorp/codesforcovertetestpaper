@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ JSON Formatter - Dark Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #0f172a; /* Slate 900 */
+            color: #e2e8f0; /* Slate 200 */
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        
+        /* Modal Animation */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: all 0.2s ease-out; }
+
+        /* Custom Dark Inputs */
+        textarea, pre {
+            background-color: #1e293b !important; /* Slate 800 */
+            border-color: #334155 !important; /* Slate 700 */
+            color: #94a3b8 !important; /* Slate 400 */
+        }
+        textarea:focus {
+            border-color: #3b82f6 !important; /* Blue 500 */
+            color: #f1f5f9 !important; /* Slate 100 */
+        }
+
+        /* Toggle Switch Styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 18px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px; width: 12px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #3b82f6; }
+        input:checked + .slider:before { transform: translateX(16px); }
+    </style>
+</head>
+<body class="min-h-screen pb-10">
+
+    <!-- Subject Selection Modal -->
+    <div id="subjectModal" class="fixed inset-0 bg-black/70 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-700 modal-enter" id="modalContent">
+            <div class="p-6 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-100">Select Subject</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-200 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-4 grid grid-cols-2 gap-3">
+                <button onclick="copySpecificSubject('Physics')" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-700 hover:border-blue-500 hover:bg-blue-900/30 transition-all group">
+                    <i class="fa-solid fa-atom text-2xl text-blue-400"></i>
+                    <span class="font-semibold text-slate-300">Physics</span>
+                </button>
+                <button onclick="copySpecificSubject('Chemistry')" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-700 hover:border-emerald-500 hover:bg-emerald-900/30 transition-all group">
+                    <i class="fa-solid fa-flask text-2xl text-emerald-400"></i>
+                    <span class="font-semibold text-slate-300">Chemistry</span>
+                </button>
+                <button onclick="copySpecificSubject('Biology')" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-700 hover:border-rose-500 hover:bg-rose-900/30 transition-all group">
+                    <i class="fa-solid fa-dna text-2xl text-rose-400"></i>
+                    <span class="font-semibold text-slate-300">Biology</span>
+                </button>
+                <button onclick="copySpecificSubject('Math')" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-700 hover:border-amber-500 hover:bg-amber-900/30 transition-all group">
+                    <i class="fa-solid fa-calculator text-2xl text-amber-400"></i>
+                    <span class="font-semibold text-slate-300">Math</span>
+                </button>
+                <button onclick="copySpecificSubject('ICT')" class="flex flex-col items-center gap-2 p-4 rounded-xl border border-slate-700 hover:border-indigo-500 hover:bg-indigo-900/30 transition-all group col-span-2">
+                    <i class="fa-solid fa-microchip text-2xl text-indigo-400"></i>
+                    <span class="font-semibold text-slate-300">ICT</span>
+                </button>
+            </div>
+            <div class="p-4 bg-slate-900/50 text-center">
+                <button onclick="closeModal()" class="text-sm text-slate-500 font-medium hover:text-slate-300 transition-colors">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-[1400px] mx-auto p-4 md:p-6">
+        <header class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4 border-b border-slate-800 pb-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-2xl font-bold text-white mb-1">MCQ JSON Converter</h1>
+                <p class="text-slate-400 text-xs">Balanced Layout. Auto-clear enabled by default.</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="chaptersBtn" onclick="openModal()" class="bg-emerald-700 hover:bg-emerald-600 text-white text-[10px] font-bold py-1.5 px-4 rounded-full shadow-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-list-ul"></i> Chapters
+                </button>
+                <button id="promptBtn" onclick="copyAiPrompt()" class="bg-indigo-700 hover:bg-indigo-600 text-white text-[10px] font-bold py-1.5 px-4 rounded-full shadow-lg transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-robot"></i> AI Prompt
+                </button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Input Section -->
+            <div class="flex flex-col space-y-2">
+                <div class="flex justify-between items-center">
+                    <label class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Input Source</label>
+                    <div class="flex items-center gap-3">
+                        <!-- Auto-clear Switch -->
+                        <div class="flex items-center gap-2 bg-slate-800/50 px-2 py-1 rounded-md border border-slate-700">
+                            <span class="text-[8px] font-bold text-slate-500 uppercase">Auto Clear</span>
+                            <label class="switch">
+                                <input type="checkbox" id="autoClearToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <button onclick="convertJson()" class="text-[10px] bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-500 transition-all font-bold shadow-md flex items-center gap-1.5">
+                            <i class="fa-solid fa-bolt"></i> Convert
+                        </button>
+                        <button onclick="clearInput()" class="text-[10px] text-slate-500 hover:text-red-400 transition-colors">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+                <textarea 
+                    id="inputJson" 
+                    placeholder='Paste raw JSON here...'
+                    class="w-full h-[50px] p-3 bg-slate-800 border border-slate-700 rounded-lg shadow-inner focus:ring-1 focus:ring-blue-500 focus:border-transparent outline-none font-mono text-xs custom-scrollbar resize-none transition-all"
+                ></textarea>
+            </div>
+
+            <!-- Output Section -->
+            <div class="flex flex-col space-y-2">
+                <div class="flex justify-between items-center">
+                    <label class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Output Preview</label>
+                    <button id="copyBtn" onclick="copyToClipboard()" class="text-[9px] bg-slate-700 text-slate-200 px-3 py-1 rounded hover:bg-slate-600 transition-all font-bold border border-slate-600">
+                        <i class="fa-regular fa-copy"></i> Copy Output
+                    </button>
+                </div>
+                <div class="relative h-full">
+                    <pre 
+                        id="outputJson" 
+                        class="w-full h-[50px] p-3 bg-slate-900 text-blue-400 rounded-lg shadow-inner overflow-auto font-mono text-[10px] leading-tight custom-scrollbar border border-slate-700"
+                    >Waiting for input...</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="h-8 mt-4 flex justify-center">
+            <div id="statusMsg" class="px-4 py-1 rounded-full text-[10px] font-bold shadow-xl hidden transition-all"></div>
+        </div>
+
+        <!-- History -->
+        <div class="mt-6 bg-slate-800/50 rounded-xl shadow-xl border border-slate-700 overflow-hidden backdrop-blur-sm">
+            <div class="bg-slate-800 px-4 py-2 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Recent Sessions</h3>
+                <span class="text-[9px] text-slate-600 font-medium italic">Auto-saved locally</span>
+            </div>
+            <div id="historyList" class="p-3 flex flex-wrap gap-2 max-h-40 overflow-y-auto custom-scrollbar">
+                <p class="text-xs text-slate-600 italic py-2 w-full text-center">No history yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let history = [];
+
+        const CHAPTERS_DATA = {
+            Physics: {
+                '1': ['Chapter 01: ভৌত জগৎ ও পরিমাপ', 'Chapter 02: ভেক্টর', 'Chapter 04: নিউটোনিয়ান বলবিদ্যা', 'Chapter 05: কাজ, শক্তি ও ক্ষমতা', 'Chapter 06: মহাকর্ষ ও অভিকর্ষ', 'Chapter 07: পদার্থের গাঠনিক ধর্ম', 'Chapter 08: পর্যাবৃত্ত গতি', 'Chapter 10: আদর্শ গ্যাস ও গ্যাসের গতিতত্ত্ব'],
+                '2': ['Chapter 01: তাপগতিবিদ্যা', 'Chapter 02: স্থির তড়িৎ', 'Chapter 03: চলতড়িৎ', 'Chapter 07: ভৌত আলোকবিজ্ঞান', 'Chapter 08: আধুনিক পদার্থবিজ্ঞানের সূচনা', 'Chapter 09: পরমাণুর মডেল এবং নিউক্লিয়ার পদার্থবিজ্ঞান', 'Chapter 10: সেমিকন্ডাক্টর ও ইলেকট্রনিক্স']
+            },
+            Chemistry: {
+                '1': ['Chapter 02: গুণগত রসায়ন', 'Chapter 03: মৌলের পর্যায়বৃত্ত ধর্ম ও রাসায়নিক বন্ধন', 'Chapter 04: রাসায়নিক পরিবর্তন', 'Chapter 05: কর্মমুখী রসায়ন'],
+                '2': ['Chapter 01: পরিবেশ রসায়ন', 'Chapter 02: জৈব রসায়ন', 'Chapter 03: পরিমাণগত রসায়ন (Quantitative Chemistry)', 'Chapter 04: তড়িৎ রসায়ন']
+            },
+            Biology: {
+                '1': ['Chapter 01: কোষ ও এর গঠন', 'Chapter 02: কোষ বিভাজন', 'Chapter 03: কোষ রসায়ন', 'Chapter 04: অণুজীব', 'Chapter 05: শৈবাল ও ছত্রাক', 'Chapter 06: ব্রায়োফাইটা ও টেরিডোফাইটা', 'Chapter 07: নগ্নজীবী ও আবৃতজীবী উদ্ভিদ', 'Chapter 08: টিস্যু ও টিস্যুতন্ত্র', 'Chapter 09: উদ্ভিদ শারীরতত্ত্ব', 'Chapter 10: উদ্ভিদ প্রজনন', 'Chapter 11: জীবপ্রযুক্তি'],
+                '2': ['Chapter 01: প্রাণীর বিভিন্নতা ও শ্রেণিবিন্যাস', 'Chapter 02: প্রাণীর পরিচিতি', 'Chapter 03: পরিপাক ও শোষণ', 'Chapter 04: রক্ত ও সঞ্চালন', 'Chapter 05: শ্বসন ও শ্বাসক্রিয়া', 'Chapter 06: বর্জ্য ও নিষ্কাশন', 'Chapter 07: চলন ও অঙ্গচালনা', 'Chapter 08: সমন্বয় ও নিয়ন্ত্রণ', 'Chapter 09: মানব জীবনের ধারাবাহিকতা', 'Chapter 10: মানবদেহের প্রতিরক্ষা', 'Chapter 11: জিনতত্ত্ব ও বিবর্তন']
+            },
+            Math: {
+                '1': ['Chapter 01: ম্যাট্রিক্স ও নির্ণায়ক', 'Chapter 03: সরলরেখা', 'Chapter 04: বৃত্ত', 'Chapter 07: সংযুক্ত কোণের ত্রিকোণমিতিক অনুপাত', 'Chapter 09: অন্তরীকরণ (Differentiation)', 'Chapter 10: যোগজীকরণ (Integration)'],
+                '2': ['Chapter 03: জটিল সংখ্যা', 'Chapter 04: বহুপদী ও বহুপদী সমীকরণ', 'Chapter 06: কণিক', 'Chapter 07: বিপরীত ত্রিকোণমিতিক ফাংশন ও ত্রিকোণমিতিক সমীকরণ', 'Chapter 08: স্থিতিবিদ্যা', 'Chapter 09: সমতলে বস্তুকণার গতি']
+            },
+            ICT: {
+                '1': ['১. তথ্য ও যোগাযোগ প্রযুক্তি : বিশ্ব ও বাংলাদেশ প্রেক্ষিত', '২. কমিউনিকেশন সিস্টেমস ও নেটওয়ার্কিং', '৩. সংখ্যা পদ্ধতি ও ডিজিটাল ডিভাইস', '৪. ওয়েব ডিজাইন পরিচিতি এবং HTML', '৫. প্রোগ্রামিং ভাষা', '৬. ডেটাবেজ ম্যানেজমেন্ট সিস্টেম']
+            }
+        };
+
+        const AI_PROMPT = `i will give you a json, you have add to key "explanation" and "chapter" 
+you have to generate a complete explanation of the answer , like how a answer came , all steps of math
+
+dont change any without adding these two keys , 
+
+if generating explanation is not possible due to incomplete explanataion , keep it blank
+
+chapters:
+'Physics': {
+      '1': ['Chapter 01: ভৌত জগৎ ও পরিমাপ', 'Chapter 02: ভেক্টর', 'Chapter 04: নিউটোনিয়ান বলবিদ্যা', 'Chapter 05: কাজ, শক্তি ও ক্ষমতা', 'Chapter 06: মহাকর্ষ ও অভিকর্ষ', 'Chapter 07: পদার্থের গাঠনিক ধর্ম', 'Chapter 08: পর্যাবৃত্ত গতি', 'Chapter 10: আদর্শ গ্যাস ও গ্যাসের গতিতত্ত্ব'],
+      '2': ['Chapter 01: তাপগতিবিদ্যা', 'Chapter 02: স্থির তড়িৎ', 'Chapter 03: চলতড়িৎ', 'Chapter 07: ভৌত আলোকবিজ্ঞান', 'Chapter 08: আধুনিক পদার্থবিজ্ঞানের সূচনা', 'Chapter 09: পরমাণুর মডেল এবং নিউক্লিয়ার পদার্থবিজ্ঞান', 'Chapter 10: সেমিকন্ডাক্টর ও ইলেকট্রনিক্স']
+    }
+
+.this is my renderer ... (flutter code section)`;
+
+        function openModal() {
+            const modal = document.getElementById('subjectModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('modal-enter');
+                content.classList.add('modal-enter-active');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('subjectModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('modal-enter-active');
+            content.classList.add('modal-enter');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        function showStatus(msg, isError = false) {
+            const status = document.getElementById('statusMsg');
+            status.textContent = msg;
+            status.className = `px-4 py-1 rounded-full text-[10px] font-bold shadow-xl ${isError ? 'bg-red-500/20 text-red-400 border border-red-500/50' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50'}`;
+            status.classList.remove('hidden');
+            if (!isError) {
+                setTimeout(() => status.classList.add('hidden'), 3000);
+            }
+        }
+
+        function copyToClipboardRaw(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                return true;
+            } catch (err) {
+                return false;
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function copySpecificSubject(subject) {
+            const data = CHAPTERS_DATA[subject];
+            const formatted = `'${subject}': ` + JSON.stringify(data, null, 2).replace(/"/g, "'") + ",";
+            if (copyToClipboardRaw(formatted)) {
+                showStatus(`${subject} copied!`);
+                closeModal();
+            }
+        }
+
+        function copyAiPrompt() {
+            if (copyToClipboardRaw(AI_PROMPT)) {
+                showStatus("AI Prompt copied!");
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('inputJson').value = '';
+            document.getElementById('outputJson').textContent = 'Waiting for input...';
+            document.getElementById('statusMsg').classList.add('hidden');
+        }
+
+        function extractPaperNumber(subjectString) {
+            if (!subjectString) return "1";
+            const match = subjectString.match(/\d+/);
+            return match ? match[0] : "1";
+        }
+
+        function addToHistory(boardName, data) {
+            const existingIndex = history.findIndex(h => h.name === boardName);
+            if (existingIndex !== -1) {
+                history[existingIndex].data = data;
+                history[existingIndex].time = new Date().toLocaleTimeString();
+            } else {
+                history.unshift({ name: boardName, data: data, time: new Date().toLocaleTimeString() });
+            }
+            if (history.length > 20) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            if (history.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-600 italic py-2 w-full text-center">No history yet.</p>';
+                return;
+            }
+            list.innerHTML = history.map((item, index) => `
+                <button 
+                    onclick="copyHistoryItem(${index}, this)" 
+                    class="bg-slate-800 border border-slate-700 hover:border-blue-500 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-[10px] transition-all flex flex-col items-start shadow-sm group min-w-[100px]"
+                >
+                    <span class="font-bold text-slate-100 group-hover:text-blue-400 truncate w-full text-left">${item.name}</span>
+                    <span class="text-[8px] text-slate-500">${item.time}</span>
+                </button>
+            `).join('');
+        }
+
+        function copyHistoryItem(index, element) {
+            const item = history[index];
+            if (copyToClipboardRaw(item.data)) {
+                showStatus(`Copied ${item.name}!`);
+            }
+        }
+
+        function convertJson() {
+            const inputArea = document.getElementById('inputJson');
+            const outputArea = document.getElementById('outputJson');
+            const autoClear = document.getElementById('autoClearToggle').checked;
+
+            try {
+                if (!inputArea.value.trim()) {
+                    showStatus("Input is empty!", true);
+                    return;
+                }
+                const raw = JSON.parse(inputArea.value);
+                const questions = raw.questions || [];
+                if (!Array.isArray(questions)) throw new Error("Missing 'questions' array.");
+                
+                let boardName = "Conversion " + (history.length + 1);
+                if (questions.length > 0 && questions[0].source?.board) {
+                    boardName = questions[0].source.board;
+                    if (questions[0].source.year) boardName += ` ${questions[0].source.year}`;
+                }
+
+                const transformed = questions.map(q => {
+                    const alphaKeys = ['a', 'b', 'c', 'd'];
+                    const optionsObj = {};
+                    q.options.forEach((opt, idx) => { if(idx < 4) optionsObj[alphaKeys[idx]] = opt; });
+                    const correctIdx = q.options.indexOf(q.answer);
+                    const cleanText = q.question.replace(/<\/?[^>]+(>|$)/g, "");
+                    return {
+                        question_text: cleanText,
+                        options: optionsObj,
+                        correct_option: correctIdx !== -1 ? alphaKeys[correctIdx] : "a",
+                        paper: extractPaperNumber(q.source?.subject)
+                    };
+                });
+                const finalJson = JSON.stringify(transformed, null, 2);
+                outputArea.textContent = finalJson;
+                addToHistory(boardName, finalJson);
+                showStatus("Done!");
+
+                // Logic for Auto Clear
+                if (autoClear) {
+                    inputArea.value = '';
+                }
+                
+            } catch (err) {
+                showStatus("Error: " + err.message, true);
+                outputArea.textContent = "// Invalid JSON.";
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('outputJson').textContent;
+            if (text.startsWith('Wait') || text.startsWith('//')) return;
+            if (copyToClipboardRaw(text)) {
+                showStatus("Copied to clipboard!");
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('subjectModal');
+            if (event.target == modal) closeModal();
+        }
+    </script>
+</body>
+</html>
