@@ -1,1 +1,56 @@
+ADMIN GUIDE: JSON IMPORT
+---------------------------------
+1. OPTIONS: Use direct fields (option_a) or a nested "options" object.
+2. LATEX: Use $...$ or \(...\) for math. Works with Bangla & English.
+3. IMAGES: Use full HTTPS links for question_image/option_image.
+4.  images are skipable , if diagram available we will ad that later . you can skip that image part .we will just add the image link on that question
+5. If there is no explanation add yourself in bangla ,user should have to understand from the explanation.write the formula before using
+6. There is no need of question numbering 
+7. In JSON, a backslash \ is an escape character, so to represent a literal backslash for LaTeX (like \text or \rightarrow), you need to use a double backslash \\.
+add a key paper 1 or 2
 
+remeber there is no calculator
+                                                                                                      
+TEMPLATE:
+[
+  {
+    "question_text": "Use $LaTeX$ or \\(LaTeX\\) for math...",
+    "options": { 
+      "a": "Option A", "b": "Option B", "c": "Option C", "d": "Option D"
+    },
+    "correct_option": "a",
+    "explanation": "Explanation,support latex $LaTeX$",
+   "chapter":"Chapter 01: ম্যাট্রিক্স ও নির্ণায়ক"
+  }
+]
+
+chapters will be like this // Logic Preserved: Chapter Data
+  final Map<String, Map<String, List<String>>> subjectChapters = {
+    'Physics': {
+      '1': ['Chapter 01: ভৌত জগৎ ও পরিমাপ', 'Chapter 02: ভেক্টর', 'Chapter 04: নিউটোনিয়ান বলবিদ্যা', 'Chapter 05: কাজ, শক্তি ও ক্ষমতা', 'Chapter 06: মহাকর্ষ ও অভিকর্ষ', 'Chapter 07: পদার্থের গাঠনিক ধর্ম', 'Chapter 08: পর্যাবৃত্ত গতি', 'Chapter 10: আদর্শ গ্যাস ও গ্যাসের গতিতত্ত্ব'],
+      '2': ['Chapter 01: তাপগতিবিদ্যা', 'Chapter 02: স্থির তড়িৎ', 'Chapter 03: চলতড়িৎ', 'Chapter 07: ভৌত আলোকবিজ্ঞান', 'Chapter 08: আধুনিক পদার্থবিজ্ঞানের সূচনা', 'Chapter 09: পরমাণুর মডেল এবং নিউক্লিয়ার পদার্থবিজ্ঞান', 'Chapter 10: সেমিকন্ডাক্টর ও ইলেকট্রনিক্স']
+    },
+    'Chemistry': {
+      '1': ['Chapter 02: গুণগত রসায়ন', 'Chapter 03: মৌলের পর্যায়বৃত্ত ধর্ম ও রাসায়নিক বন্ধন', 'Chapter 04: রাসায়নিক পরিবর্তন', 'Chapter 05: কর্মমুখী রসায়ন'],
+      '2': ['Chapter 01: পরিবেশ রসায়ন', 'Chapter 02: জৈব রসায়ন', 'Chapter 03: পরিমাণগত রসায়ন (Quantitative Chemistry)', 'Chapter 04: তড়িৎ রসায়ন']
+    },
+    'Biology': {
+      '1': ['Chapter 01: কোষ ও এর গঠন', 'Chapter 02: কোষ বিভাজন', 'Chapter 03: কোষ রসায়ন', 'Chapter 04: অণুজীব', 'Chapter 05: শৈবাল ও ছত্রাক', 'Chapter 06: ব্রায়োফাইটা ও টেরিডোফাইটা', 'Chapter 07: নগ্নজীবী ও আবৃতজীবী উদ্ভিদ', 'Chapter 08: টিস্যু ও টিস্যুতন্ত্র', 'Chapter 09: উদ্ভিদ শারীরতত্ত্ব', 'Chapter 10: উদ্ভিদ প্রজনন', 'Chapter 11: জীবপ্রযুক্তি'],
+      '2': ['Chapter 01: প্রাণীর বিভিন্নতা ও শ্রেণিবিন্যাস', 'Chapter 02: প্রাণীর পরিচিতি', 'Chapter 03: পরিপাক ও শোষণ', 'Chapter 04: রক্ত ও সঞ্চালন', 'Chapter 05: শ্বসন ও শ্বাসক্রিয়া', 'Chapter 06: বর্জ্য ও নিষ্কাশন', 'Chapter 07: চলন ও অঙ্গচালনা', 'Chapter 08: সমন্বয় ও নিয়ন্ত্রণ', 'Chapter 09: মানব জীবনের ধারাবাহিকতা', 'Chapter 10: মানবদেহের প্রতিরক্ষা', 'Chapter 11: জিনতত্ত্ব ও বিবর্তন']
+    },
+    'Math': {
+      '1': ['Chapter 01: ম্যাট্রিক্স ও নির্ণায়ক', 'Chapter 03: সরলরেখা', 'Chapter 04: বৃত্ত', 'Chapter 07: সংযুক্ত কোণের ত্রিকোণমিতিক অনুপাত', 'Chapter 09: অন্তরীকরণ (Differentiation)', 'Chapter 10: যোগজীকরণ (Integration)'],
+      '2': ['Chapter 03: জটিল সংখ্যা', 'Chapter 04: বহুপদী ও বহুপদী সমীকরণ', 'Chapter 06: কণিক', 'Chapter 07: বিপরীত ত্রিকোণমিতিক ফাংশন ও ত্রিকোণমিতিক সমীকরণ', 'Chapter 08: স্থিতিবিদ্যা', 'Chapter 09: সমতলে বস্তুকণার গতি']
+    },
+    'ICT': {
+      '1': ['১. তথ্য ও যোগাযোগ প্রযুক্তি : বিশ্ব ও বাংলাদেশ প্রেক্ষিত', '২. কমিউনিকেশন সিস্টেমস ও নেটওয়ার্কিং', '৩. সংখ্যা পদ্ধতি ও ডিজিটাল ডিভাইস', '৪. ওয়েব ডিজাইন পরিচিতি এবং HTML', '৫. প্রোগ্রামিং ভাষা', '৬. ডেটাবেজ ম্যানেজমেন্ট সিস্টেম']
+    }
+  };
+
+give me all the mcq from the image, dont skip single mcq
+
+question and option text should exactly like provided,dont change anything, 
+
+for only biology explain other options to shortly relavent
+
+if the option has no right answer, fix the option,add {question fixed on question text } and mention why/what it was wrong along with answer in explanation
