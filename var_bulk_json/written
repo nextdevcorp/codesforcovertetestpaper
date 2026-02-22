@@ -1,1 +1,19 @@
 
+[{
+  "question_text": "Your question...",
+  "answer_text": "Your answer...",
+}]
+
+dont give serial number in question.just question text
+
+remember there is no calculator, so keep it till that part a human can do without calculator
+
+{one question has multiple part, keep the question as it is}
+
+you can add mark distribution as in the image
+
+if quesion/answer has image skip only the image , we will add it later
+
+if the image contain different subject , give different json for each
+
+dont do this **$S_N2$:** , do $S_N2$ or **S_N2:**
